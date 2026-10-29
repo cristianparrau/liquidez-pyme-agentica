@@ -61,3 +61,14 @@ test("Asesor: salida fuera de contrato se descarta", async () => {
   assert.equal(r.fuente, "respaldo")
   assert.match(r.motivo ?? "", /JSON/)
 })
+
+test("Asesor: si el modelo excede el presupuesto de tiempo, responde el respaldo", async () => {
+  process.env.ASESOR_PRESUPUESTO_MS = "50"
+  const c = o.iniciarCaso("andina", AUT)
+  o.evaluarFacturas(c.id)
+  const lento: ProveedorLLM = { nombre: "lento", modelo: "lento", enviar: () => new Promise((r) => setTimeout(() => r({ texto: "{}", llamadas: [], tokens: 0 }), 500)) }
+  const r = await responder(lento, "¿cuánto recibo?", c.id)
+  delete process.env.ASESOR_PRESUPUESTO_MS
+  assert.equal(r.fuente, "respaldo")
+  assert.match(r.motivo ?? "", /tardó/)
+})

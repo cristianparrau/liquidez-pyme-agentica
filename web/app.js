@@ -234,10 +234,10 @@ async function pintarMetricas() {
   const m = await api("/api/metricas").catch(() => null)
   if (!m) return
   const kpi = (t, v, sub) => `<div class="kpi"><small>${t}</small><b>${v}</b>${sub ? `<small>${sub}</small>` : ""}</div>`
-  $("#metricas").innerHTML = kpi("Mensajes al Asesor", m.mensajes) + kpi("Bloqueadas por grounding", m.bloqueadasGrounding, `${pct(m.tasaBloqueoGrounding)} de las respuestas del modelo`) + kpi("Bloqueados por el Guardián", m.bloqueadasGuardian, "mensajes con instrucciones") + kpi("Latencia del modelo", m.latenciaP50Ms ? `${(m.latenciaP50Ms / 1000).toFixed(1)} s` : "—", m.latenciaP95Ms ? `p95 ${(m.latenciaP95Ms / 1000).toFixed(1)} s` : "p50")
+  $("#metricas").style.gridTemplateColumns = "repeat(5,1fr)"; $("#metricas").innerHTML = kpi("Mensajes al Asesor", m.mensajes) + kpi("Bloqueadas por grounding", m.bloqueadasGrounding, `${pct(m.tasaBloqueoGrounding)} de las respuestas del modelo`) + kpi("Bloqueados por el Guardián", m.bloqueadasGuardian, "mensajes con instrucciones") + kpi("Respaldo por falla o tiempo", m.respaldoPorFalla, `presupuesto ${15} s`) + kpi("Latencia del modelo", m.latenciaP50Ms ? `${(m.latenciaP50Ms / 1000).toFixed(1)} s` : "—", m.latenciaP95Ms ? `p95 ${(m.latenciaP95Ms / 1000).toFixed(1)} s` : "p50")
 }
 async function correrEvals(conModelo) {
-  $("#evals").innerHTML = `<p class="nota">Ejecutando${conModelo ? " (incluye llamadas reales al modelo, ~1 minuto)" : ""}…</p>`
+  $("#evals").innerHTML = `<p class="nota">Ejecutando${conModelo ? " (incluye llamadas reales al modelo; puede tardar hasta 2 minutos)" : ""}…</p>`
   await intentar(async () => {
     const r = await api(`/api/evals${conModelo ? "?modelo=1" : ""}`)
     $("#evals").innerHTML = `<p><b>${r.aprobadas} de ${r.total} suites aprobadas</b> · política ${esc(r.politica)} · ${new Date(r.fecha).toLocaleString("es-CO")}</p>
