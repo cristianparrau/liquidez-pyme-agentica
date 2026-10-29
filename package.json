@@ -4,13 +4,22 @@
   "private": true,
   "type": "module",
   "description": "Prototipo: Adelanto de facturas para pymes con solución agéntica (banco de segundo piso)",
-  "engines": { "node": ">=20.12" },
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
     "dev": "node --env-file-if-exists=.env --watch --import tsx src/server.ts",
     "start": "node --env-file-if-exists=.env --import tsx src/server.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test \"tests/**/*.test.ts\""
+    "test": "tsx --test \"tests/**/*.test.ts\"",
+    "evals": "node --env-file-if-exists=.env --import tsx src/evals/run.ts"
   },
-  "dependencies": { "zod": "^4.6.5", "tsx": "^4.23.15" },
-  "devDependencies": { "@types/node": "^26.6.3", "typescript": "^7.0.2" }
+  "dependencies": {
+    "zod": "^4.6.5",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2"
+  }
 }

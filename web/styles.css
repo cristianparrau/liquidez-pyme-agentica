@@ -39,3 +39,5 @@ tr.recomendada{background:var(--soft)}
 .nota{font-size:12px;color:var(--muted);margin-top:10px}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.grid3,.resumen,.campos{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.grid3,.resumen,.campos{grid-template-columns:1fr}.top{flex-wrap:wrap}}
+
+.msg.escribiendo{color:var(--muted);font-style:italic}details summary{cursor:pointer}details table{margin-top:6px}

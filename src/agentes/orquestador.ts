@@ -3,6 +3,7 @@ import { DOCUMENTO_MALICIOSO, FECHA_REFERENCIA, empresa, facturasDe, pagador, FA
 import { evaluarFactura, diasEntre } from "../dominio/motor.ts"
 import { POLITICA } from "../dominio/politica.ts"
 import { revisarTexto } from "../dominio/guardian.ts"
+import { reiniciarMetricas } from "./metricas.ts"
 import type { AgenteId, Caso, Evento, ItemBandeja, Nivel, Resultado, TipoBandeja } from "../dominio/tipos.ts"
 
 /**
@@ -29,6 +30,12 @@ function abrirItem(caso: Caso, tipo: TipoBandeja, titulo: string, motivo: string
   return item
 }
 
+/** Registro de auditoría desde otros módulos (Asesor, grounding). */
+export function registrarAuditoria(casoId: string, agente: AgenteId, accion: string, resultado: Resultado, detalle: string, extra: { herramienta?: string; sistema?: string; nivel?: Nivel; datos?: Record<string, unknown> } = {}): void {
+  const caso = casos.get(casoId)
+  if (caso) registrar(caso, agente, accion, resultado, detalle, extra)
+}
+
 export function obtenerCaso(id: string): Caso {
   const caso = casos.get(id)
   if (!caso) throw new ErrorNegocio("Caso no encontrado.")
@@ -37,10 +44,17 @@ export function obtenerCaso(id: string): Caso {
 
 export const listarBandeja = () => [...bandeja.values()].sort((a, b) => (a.estado === b.estado ? b.creado.localeCompare(a.creado) : a.estado === "pendiente" ? -1 : 1))
 
+/** Elimina un caso y sus elementos de bandeja (lo usan las evals para no tocar la demo en curso). */
+export function eliminarCaso(id: string): void {
+  casos.delete(id)
+  for (const [k, i] of bandeja) if (i.casoId === id) bandeja.delete(k)
+}
+
 /** Limpia el estado en memoria (pruebas y botón "reiniciar demo"). */
 export function reiniciar(): void {
   casos.clear()
   bandeja.clear()
+  reiniciarMetricas()
 }
 
 // ── Agente KYC ────────────────────────────────────────────────────────────────

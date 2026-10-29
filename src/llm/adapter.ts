@@ -12,10 +12,13 @@ export type DeclaracionHerramienta = { nombre: string; descripcion: string; para
 
 export type RespuestaLLM = { texto: string; llamadas: LlamadaHerramienta[]; tokens: number; crudo?: unknown }
 
+/** Opciones por llamada. `esquemaJson`: pide una salida JSON que cumpla ese JSON Schema (structured output). */
+export type OpcionesLLM = { esquemaJson?: Record<string, unknown> }
+
 export interface ProveedorLLM {
   readonly nombre: string
   readonly modelo: string
-  enviar(mensajes: Mensaje[], herramientas: DeclaracionHerramienta[]): Promise<RespuestaLLM>
+  enviar(mensajes: Mensaje[], herramientas: DeclaracionHerramienta[], opciones?: OpcionesLLM): Promise<RespuestaLLM>
 }
 
 export class ErrorLLM extends Error {}

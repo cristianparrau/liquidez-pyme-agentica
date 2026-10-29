@@ -1,4 +1,4 @@
-import { ErrorLLM, type DeclaracionHerramienta, type Mensaje, type ProveedorLLM, type RespuestaLLM } from "./adapter.ts"
+import { ErrorLLM, type DeclaracionHerramienta, type Mensaje, type OpcionesLLM, type ProveedorLLM, type RespuestaLLM } from "./adapter.ts"
 
 type Parte = { text?: string; functionCall?: { name: string; args?: Record<string, unknown> }; functionResponse?: { name: string; response: Record<string, unknown> }; thoughtSignature?: string }
 type Contenido = { role: "user" | "model"; parts: Parte[] }
@@ -73,11 +73,11 @@ export class Gemini implements ProveedorLLM {
   ) {}
 
   /** Modelo principal con reintentos; si sigue saturado o sin cuota, un intento con cada modelo de respaldo en orden. */
-  async enviar(mensajes: Mensaje[], herramientas: DeclaracionHerramienta[]): Promise<RespuestaLLM> {
+  async enviar(mensajes: Mensaje[], herramientas: DeclaracionHerramienta[], opciones: OpcionesLLM = {}): Promise<RespuestaLLM> {
     const modelos = [this.modelo, ...this.modelosRespaldo]
     for (const [i, modelo] of modelos.entries()) {
       try {
-        return await this.enviarCon(modelo, mensajes, herramientas, i === 0 ? this.esperasReintentoMs : [])
+        return await this.enviarCon(modelo, mensajes, herramientas, i === 0 ? this.esperasReintentoMs : [], opciones)
       } catch (e) {
         if (!(e instanceof ErrorSaturacion) || i === modelos.length - 1) throw e
       }
@@ -85,13 +85,13 @@ export class Gemini implements ProveedorLLM {
     throw new ErrorLLM("Sin modelos disponibles.")
   }
 
-  private async enviarCon(modelo: string, mensajes: Mensaje[], herramientas: DeclaracionHerramienta[], esperas: number[]): Promise<RespuestaLLM> {
+  private async enviarCon(modelo: string, mensajes: Mensaje[], herramientas: DeclaracionHerramienta[], esperas: number[], opciones: OpcionesLLM = {}): Promise<RespuestaLLM> {
     const sistema = mensajes.filter((m) => m.rol === "sistema").map((m) => (m.rol === "sistema" ? m.texto : "")).join("\n\n")
     const cuerpo = {
       systemInstruction: { parts: [{ text: sistema }] },
       contents: aContenidos(mensajes),
       ...(herramientas.length ? { tools: [{ functionDeclarations: herramientas.map((h) => ({ name: h.nombre, description: h.descripcion, parameters: limpiarEsquema(h.parametros) })) }] } : {}),
-      generationConfig: { temperature: 0 },
+      generationConfig: { temperature: 0, ...(opciones.esquemaJson ? { responseMimeType: "application/json", responseSchema: limpiarEsquema(opciones.esquemaJson) } : {}) },
     }
     let res: Response | null = null
     let json: RespuestaGemini = {}

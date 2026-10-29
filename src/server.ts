@@ -9,6 +9,8 @@ import { compararAlternativas } from "./dominio/alternativas.ts"
 import { POLITICA } from "./dominio/politica.ts"
 import * as orq from "./agentes/orquestador.ts"
 import { responder } from "./agentes/asesor.ts"
+import { resumenMetricas } from "./agentes/metricas.ts"
+import { ejecutarEvals } from "./evals/evals.ts"
 
 const r = cargarEntorno()
 if (!r.ok) {
@@ -88,6 +90,15 @@ const servidor = createServer(async (req, res) => {
       const casoId = txt(c.casoId) || undefined
       const respuesta = await responder(llm, mensaje, casoId)
       return json(res, 200, { ...respuesta, caso: casoId ? orq.vistaCaso(orq.obtenerCaso(casoId)) : null })
+    }
+    if (req.method === "GET" && ruta === "/api/metricas") return json(res, 200, resumenMetricas())
+    if (req.method === "GET" && ruta === "/api/evals") {
+      const conModelo = url.searchParams.get("modelo") === "1"
+      if (conModelo) {
+        const permiso = limitador.permitir(ip(req))
+        if (!permiso.ok) return json(res, 429, { error: `Demasiadas solicitudes. Intenta en ${permiso.reintentarEnSeg} s.` })
+      }
+      return json(res, 200, await ejecutarEvals(conModelo ? llm : null))
     }
     if (req.method === "GET" && ruta === "/api/bandeja") return json(res, 200, orq.listarBandeja())
     if (req.method === "POST" && b) {
