@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquidez Pyme · Fomento Andino</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">FA</span><div><b>Fomento Andino</b><small>Liquidez Pyme · prototipo</small></div></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab activo" data-vista="pyme">Vista pyme</button>
+    <button class="tab" data-vista="banco">Vista banco <span id="contador" class="contador" hidden></span></button>
+  </nav>
+  <button class="link" id="reiniciar" title="Borra los casos en memoria">Reiniciar demo</button>
+</header>
+
+<main id="vista-pyme" class="layout">
+  <section class="principal">
+    <ol class="pasos" id="pasos"></ol>
+    <div id="etapa"></div>
+  </section>
+  <aside class="lateral">
+    <div class="panel">
+      <div class="panel-head"><h2>¿Qué está haciendo el agente?</h2><span class="sub" id="caso-id">Sin caso</span></div>
+      <ol class="traza" id="traza"><li class="vacio">Aquí verás cada paso de los agentes: qué sistema consultan, qué deciden y cuándo pasan el caso a una persona.</li></ol>
+    </div>
+    <div class="panel chat">
+      <div class="panel-head"><h2>Asesor</h2><span class="sub" id="modelo"></span></div>
+      <div class="mensajes" id="mensajes"><div class="msg bot">Hola. Te ayudo a entender tus opciones de liquidez, tu oferta o por qué una factura no es apta. También puedo ponerte en contacto con una persona.</div></div>
+      <form id="form-chat" class="form-chat"><input id="entrada" autocomplete="off" placeholder="Escribe tu pregunta…" maxlength="1500"><button>Enviar</button></form>
+      <div class="sugerencias" id="sugerencias"></div>
+    </div>
+  </aside>
+</main>
+
+<main id="vista-banco" class="banco" hidden>
+  <section>
+    <h1>Bandeja de decisiones humanas</h1>
+    <p class="lead">Los agentes no deciden fuera de política. Aquí llegan las aprobaciones sobre el umbral, las alertas de cumplimiento y las solicitudes de contacto, con su contexto y la razón del pase.</p>
+    <div id="bandeja" class="bandeja"></div>
+  </section>
+  <section>
+    <h2>Registro de auditoría</h2>
+    <p class="lead">Cada evento queda trazado: agente, herramienta, sistema consultado, nivel de autonomía y responsable.</p>
+    <select id="selector-caso"></select>
+    <div class="tabla-wrap"><table class="auditoria" id="auditoria"></table></div>
+  </section>
+</main>
+<div id="aviso" class="aviso" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
